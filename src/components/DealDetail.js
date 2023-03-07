@@ -1,7 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-
+import {
+    View,
+    Text,
+    Image,
+    PanResponder,
+    Animated,
+    Easing,
+    TouchableOpacity,
+    Dimensions,
+    StyleSheet
+} from 'react-native';
 import { priceDisplay } from '../util';
 import { fetchDealDetail } from '../Ajax';
 
@@ -9,7 +18,51 @@ const DealDetail = ({
     initialDealData,
     goBackToList
 }) => {
-    const [fullDeal, setFullDeal] = useState({});
+    const width = Dimensions.get('window').width;
+    const imageXPos = useRef(new Animated.Value(0)).current;
+
+    const imagePanResponder = PanResponder.create({
+        onStartShouldSetPanResponderCapture: () => true,
+        onPanResponderMove: (evt, gestureState) => {
+            imageXPos.setValue(gestureState.dx);
+        },
+        onPanResponderRelease: (evt, gestureState) => {
+            //if the movement is more than 40% of the screen width
+            if (Math.abs(gestureState.dx) > width * 0.4) {
+                const direction = Math.sign(gestureState.dx);
+                Animated.timing(imageXPos, {
+                    toValue: direction * width,
+                    duration: 250,
+                    useNativeDriver: false,
+                }).start(() => handleSwipe(-1 * direction));
+            } else {
+                Animated.spring(imageXPos, {
+                    toValue: 0,
+                    useNativeDriver: false,
+                }).start();
+            }
+        },
+    });
+
+    const handleSwipe = (indexDirection) => {
+        if (!fullDeal.media[imageIndex + indexDirection]) {
+            Animated.spring(imageXPos, {
+                toValue: 0,
+                useNativeDriver: false,
+            }).start();
+            return;
+        }
+
+        setImageIndex(imageIndex + indexDirection);
+        imageXPos.setValue(indexDirection * width);
+        Animated.spring(imageXPos, {
+            toValue: 0,
+            useNativeDriver: false,
+        }).start();
+    };
+
+    const [fullDeal, setFullDeal] = useState(initialDealData);
+    const [imageIndex, setImageIndex] = useState(0);
 
     const fetchData = async () => {
         setFullDeal(await fetchDealDetail(initialDealData.key));
@@ -18,13 +71,18 @@ const DealDetail = ({
     useEffect(() => {
         fetchData();
     }, []);
+
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={goBackToList}>
                 <Text style={styles.backLink}>Back</Text>
             </TouchableOpacity>
-            <View style={styles.details}>
-                <Image source={{ uri: initialDealData.media[0] }} style={styles.image} />
+            <View>
+                <Animated.Image
+                    {...imagePanResponder.panHandlers}
+                    source={{ uri: initialDealData.media[imageIndex] }}
+                    style={[{ left: imageXPos }, styles.image]}
+                />
                 <View style={styles.titleContainer}>
                     <Text style={[styles.titleText, styles.textBold]}>{initialDealData.title}</Text>
                 </View>
@@ -56,20 +114,11 @@ DealDetail.propTypes = {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        marginHorizontal: 10,
-    },
     backLink: {
         marginHorizontal: 10,
         marginBottom: 16,
         color: '#22f',
         fontSize: 20,
-    },
-    details: {
-        borderColor: '#bbb',
-        borderWidth: 1,
-        borderTopWidth: 0,
-        borderRadius: 5,
     },
     image: {
         width: '100%',
@@ -98,6 +147,9 @@ const styles = StyleSheet.create({
     avatar: {
         width: 60,
         height: 60,
+        borderColor: '#bbb',
+        borderWidth: 1,
+        borderRadius: 50,
     },
     descriptionContainer: {
         padding: 10,
