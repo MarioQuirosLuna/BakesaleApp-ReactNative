@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
-import { View, Text, StyleSheet } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    Animated,
+    Easing,
+    //Dimensions
+} from 'react-native';
 import { fetchInitialDeals, fetchDealSearchResults } from '../Ajax';
 
 import DealList from './DealList';
@@ -8,6 +15,7 @@ import DealDetail from './DealDetail';
 import SearchBar from './SearchBar';
 
 const App = () => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
     const [deals, setDeals] = useState([]);
     const [dealsFromSearch, setDealsFromSearch] = useState([]);
     const [currentDealId, setCurrentDealId] = useState(null);
@@ -25,6 +33,20 @@ const App = () => {
         setDealsFromSearch([]);
         setRefresh(!refresh);
     };
+    const fadeInOut = (value = 1) => {
+        //const width = Dimensions.get('window').width;
+        Animated.timing(fadeAnim, {
+            toValue: value,
+            duration: 2000,
+            useNativeDriver: true,
+            easing: Easing.bounce,
+        }).start(({ finished }) => {
+            if (finished) {
+                fadeInOut(value * -1);
+            }
+        });
+    };
+
     useEffect(() => {
         if (dealsFromSearch.length > 0) {
             setDeals(dealsFromSearch);
@@ -33,6 +55,9 @@ const App = () => {
         }
     }, [refresh]);
 
+    useEffect(() => {
+        fadeInOut();
+    }, []);
 
 
     const setCurrentDealIdHandler = (dealId) => {
@@ -64,9 +89,9 @@ const App = () => {
         );
     }
     return (
-        <View style={styles.container}>
+        <Animated.View style={[{ opacity: fadeAnim }, styles.container]}>
             <Text style={styles.header}>BakeSale App...</Text>
-        </View>
+        </Animated.View>
     );
 }
 
