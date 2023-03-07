@@ -10,7 +10,8 @@ import {
     TouchableOpacity,
     Dimensions,
     StyleSheet,
-    Linking
+    Linking,
+    ScrollView
 } from 'react-native';
 import { priceDisplay } from '../util';
 import { fetchDealDetail } from '../Ajax';
@@ -77,19 +78,19 @@ const DealDetail = ({
         Linking.openURL(fullDeal.url);
     };
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <TouchableOpacity onPress={goBackToList}>
                 <Text style={styles.backLink}>Back</Text>
             </TouchableOpacity>
+            <Animated.Image
+                {...imagePanResponder.panHandlers}
+                source={{ uri: initialDealData.media[imageIndex] }}
+                style={[{ left: imageXPos }, styles.image]}
+            />
+            <View style={styles.titleContainer}>
+                <Text style={[styles.titleText, styles.textBold]}>{initialDealData.title}</Text>
+            </View>
             <View>
-                <Animated.Image
-                    {...imagePanResponder.panHandlers}
-                    source={{ uri: initialDealData.media[imageIndex] }}
-                    style={[{ left: imageXPos }, styles.image]}
-                />
-                <View style={styles.titleContainer}>
-                    <Text style={[styles.titleText, styles.textBold]}>{initialDealData.title}</Text>
-                </View>
                 <View style={styles.info}>
                     <View style={styles.priceAndCause}>
                         <Text style={[styles.price, styles.textBold]}>{priceDisplay(initialDealData.price)}</Text>
@@ -109,7 +110,7 @@ const DealDetail = ({
                 </View>
                 <Button title="Buy this deal!" onPress={openDealUrl} />
             </View>
-        </View >
+        </ScrollView >
     );
 };
 
@@ -119,6 +120,10 @@ DealDetail.propTypes = {
 };
 
 const styles = StyleSheet.create({
+    container: {
+        marginBottom: 20,
+        minHeight: '100%',
+    },
     backLink: {
         marginHorizontal: 10,
         marginBottom: 16,
