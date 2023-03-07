@@ -6,10 +6,11 @@ import {
     Image,
     PanResponder,
     Animated,
-    Easing,
+    Button,
     TouchableOpacity,
     Dimensions,
-    StyleSheet
+    StyleSheet,
+    Linking
 } from 'react-native';
 import { priceDisplay } from '../util';
 import { fetchDealDetail } from '../Ajax';
@@ -72,6 +73,9 @@ const DealDetail = ({
         fetchData();
     }, []);
 
+    const openDealUrl = () => {
+        Linking.openURL(fullDeal.url);
+    };
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={goBackToList}>
@@ -103,6 +107,7 @@ const DealDetail = ({
                 <View style={styles.descriptionContainer}>
                     <Text style={styles.textBold}>{fullDeal.description}</Text>
                 </View>
+                <Button title="Buy this deal!" onPress={openDealUrl} />
             </View>
         </View >
     );
