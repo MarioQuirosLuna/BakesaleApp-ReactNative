@@ -57,10 +57,11 @@ DealDetail.propTypes = {
 
 const styles = StyleSheet.create({
     container: {
-        margin: 10,
+        marginHorizontal: 10,
     },
     backLink: {
-        margin: 10,
+        marginHorizontal: 10,
+        marginBottom: 16,
         color: '#22f',
         fontSize: 20,
     },

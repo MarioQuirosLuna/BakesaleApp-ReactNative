@@ -19,3 +19,13 @@ export const fetchDealDetail = async (dealId) => {
         console.log(error);
     }
 };
+
+export const fetchDealSearchResults = async (searchTerm) => {
+    try {
+        const response = await fetch(apiHost + '/api/deals?searchTerm=' + searchTerm);
+        const json = await response.json();
+        return json;
+    } catch (error) {
+        console.log(error);
+    }
+};
