@@ -29,6 +29,7 @@
    - A search bar was created
    - Conditional render were used
    - Swipe Gesture image were implements
+   - PropTypes
 
    ### ⭐ Languages.
    
